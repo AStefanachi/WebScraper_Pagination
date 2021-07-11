@@ -2,18 +2,20 @@
 # Library Used BeautifulSoup4, Requests, Styleframe, Pandas, OS
 # Code Golden, Developer
 
+# General Import
 import pandas as pd
-import os
 from functions import *
 from styleframe import StyleFrame
+from tqdm import tqdm
+from configurations import *
 
-default_path = os.path.dirname(__file__)
-
+# Get maximum page range
 pages = get_max_pagination()
 
 result = []
 
-for i in range(1, pages + 1):
+# Looping through pages and extracting data
+for i in tqdm(range(1, pages + 1), desc="Scraping..."):
     url = "https://scrapethissite.com/pages/forms/?page_num=" + str(i)
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
@@ -34,6 +36,8 @@ for i in range(1, pages + 1):
         ot_losses = element.find("td", class_="ot-losses")
         ot_losses = ot_losses.text
         ot_losses = ot_losses.strip()
+        if len(ot_losses) == 0:
+            ot_losses = str(np.NaN)
         try:
             win_pct = element.find("td", class_="pct text-success")
             win_pct = win_pct.text
@@ -56,17 +60,33 @@ for i in range(1, pages + 1):
             diff_success = element.find("td", class_="diff text-danger")
             diff_success = diff_success.text
             diff_success = diff_success.strip()
+
         result.append((team_name, year, wins, losses, ot_losses, win_pct, goals_for, goals_against, diff_success))
 
 columns = get_columns_name()
+
 df = pd.DataFrame(result, columns=columns)
 
+entries = len(df.index)
+
+print("[+] Scraping completed: " + str(entries) + " entries found")
+
+# building styled Excel file
+
+print("[+] Building .xlsx output")
+
 sf = StyleFrame(df)
+
 file = os.path.join(default_path, "output.xlsx")
+
 writer = sf.ExcelWriter(file)
 
-sf.to_excel(excel_writer=writer, sheet_name="teams", index=False, row_to_add_filters=0, best_fit=columns)
+sf.to_excel(excel_writer=writer, na_rep=np.NaN, sheet_name="teams", index=False, row_to_add_filters=0, best_fit=columns)
 
 writer.save()
 
-print("Done!")
+# csv output
+
+print("[+] Building .csv output")
+
+df.to_csv("output.csv", na_rep=np.NaN, index=False)

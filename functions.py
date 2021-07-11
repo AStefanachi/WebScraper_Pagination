@@ -3,6 +3,7 @@ import requests
 import numpy as np
 
 
+# Get maximum page range
 def get_max_pagination():
     url = "https://scrapethissite.com/pages/forms/"
 
@@ -20,6 +21,7 @@ def get_max_pagination():
         number = i.get_text()
         number = number.strip()
         try:
+            # Checking if the result is a number
             float(number)
             pages.append(number)
         except ValueError:
@@ -32,6 +34,7 @@ def get_max_pagination():
     return n_pages
 
 
+# Get column names for pandas
 def get_columns_name():
     url = "https://scrapethissite.com/pages/forms/"
 
