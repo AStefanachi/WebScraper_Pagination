@@ -1,6 +1,6 @@
 # Web Scraping a website with Pagination
 # Library Used BeautifulSoup4, Requests, Styleframe, Pandas, OS
-# Code Golden, Developer
+# Andrea Stefanachi, Developer
 
 # General Import
 import pandas as pd
